@@ -90,7 +90,7 @@ func main() {
 			files["ubuntu"] = "FROM foobar"
 			c.Load( files )
 			c.Query( "foobar" )
-			result := c.Search()
+			result := c.Filter( []string{ "Hi" } )
 			fmt.Println( "Search results: ", result )
 		} else {
 			fmt.Println( "No configuration file found, use --generate-config" )

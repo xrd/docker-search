@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"fmt"
 	"github.com/BurntSushi/toml"
+	"strings"
 )
 
 type Client struct {
@@ -40,8 +41,17 @@ func (c* Client) LoadConfig( path string ) bool {
 
 }
 
-func (c* Client) Search() string { 
-	return "Hi there"
+func (c* Client) Filter( items []string ) string { 
+	found := []string{}
+	for _, v := range c.dockerfiles {
+		for _,e := range items {
+			if -1 != strings.Index( v, e ) {
+				found = append( found, e )
+			}
+		}
+		
+	}
+	return strings.Join( found, ", " )
 }
 
 func (c* Client) Query( term string ) string {

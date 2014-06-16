@@ -8,7 +8,7 @@ func TestSomething( t *testing.T ) {
 	files["foobar"] = "Hi there"
 	c.Load( files )
 	// c.Query( "hi" )
-	if result := c.Search(); "" == result {
+	if result := c.Filter( []string{"Hi"} ); "" == result {
 		t.Errorf( "Error!" )
 	}
 
