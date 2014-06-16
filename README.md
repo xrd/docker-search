@@ -2,6 +2,16 @@
 
 docker-search: a better way to search the docker registry.
 
+### Developer Details ###
+
+docker-search works in three stages right now. 
+
+* search: query the docker index
+* query: annotate the search result with scraped data, like Dockerfiles themselves
+* filter: filter through the data based on interesting information
+
+This structure allows us to write tests since we can seed data (using the `Load` method 
+on the client) that has us skip the first two stages. As long as our results are normal.
 
 ### The Configuration File ###
 
