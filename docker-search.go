@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"flag"
+	"os"
+	"os/user"
+	"path"
 )
 
 func help() {
@@ -26,6 +29,7 @@ docker-search --list # print out cached search list
 
 Flags:
 
+--generate-config   # Create a new configuration file from current defaults
 --dockerfile        # Print out full Dockerfile with results
 --string            # Search for the string in the Dockerfile
 --string=match      # Search for the string with a filter of match
@@ -38,16 +42,59 @@ Flags:
 
 }
 
+const DEFAULT_CONFIG_FILE = ".docker-search.toml"
+
+func getHomeDir() string {
+	usr, err := user.Current()
+	if err != nil {
+		fmt.Println( "Error: ", err )
+	}
+	return usr.HomeDir 
+}
+
+func getConfigFilePath() string {
+	return path.Join( getHomeDir(), DEFAULT_CONFIG_FILE )
+}
+
+func generateDefaultConfiguration() {
+	configPath := getConfigFilePath()
+	
+	// Generate configuration
+	if file, err := os.Create( configPath ); nil == err {
+		def := `
+Host = "http://192.168.59.103:2375"
+Endpoint = "/v1.12/images/search"
+UpdateCheck = true
+`
+		file.Write( []byte(def) )
+		fmt.Println( "Created new configuration file" )
+	} else {
+		fmt.Println( "Unable to create new configuration file at: ", configPath, err )
+	}
+}
+
 func main() {
 	
-	// var ip = flag.Int("flagname", 1234, "help message for flagname")
+	// var ip  = flag.Int("flagname", 1234, "help message for
+	// flagname")
+	var genCon = flag.Bool( "generate-config", false, "Generate a new default configuration file" )
 	flag.Parse()
-	
-	help()
 
-	files := make( map[string]string )
-	files["ubuntu"] = "FROM foobar"
-	Load( files )
-	result := Search( "foobar" )
-	fmt.Println( "Search results: ", result )
+	if *genCon {
+		generateDefaultConfiguration()
+		flag.PrintDefaults()
+	} else {
+		c := new(Client)
+		if c.LoadConfig( getConfigFilePath() ) {
+			files := make( map[string]string )
+			files["ubuntu"] = "FROM foobar"
+			c.Load( files )
+			c.Query( "foobar" )
+			result := c.Search()
+			fmt.Println( "Search results: ", result )
+		} else {
+			fmt.Println( "No configuration file found, use --generate-config" )
+			
+		}
+	}
 }
