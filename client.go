@@ -5,12 +5,14 @@ import (
 	"io/ioutil"
 	"fmt"
 	"github.com/BurntSushi/toml"
-	"strings"
+//	"strings"
+//	"encoding/json"
 )
 
 type Client struct {
 	config *Config
 	dockerfiles map[string]string
+	results string
 }
 
 type Docker struct {
@@ -41,36 +43,70 @@ func (c* Client) LoadConfig( path string ) bool {
 
 }
 
-func (c* Client) Filter( items []string ) string { 
-	found := []string{}
-	for _, v := range c.dockerfiles {
-		for _,e := range items {
-			if -1 != strings.Index( v, e ) {
-				found = append( found, e )
-			}
-		}
-		
-	}
-	return strings.Join( found, ", " )
+
+type Tuple struct {
+	name string
+	dockerfile string
+	
 }
 
-func (c* Client) Query( term string ) string {
+func (c* Client) grabDockerfile( ci chan Tuple, name string ) {
+	// Raw link: https://registry.hub.docker.com/u/bfirsh/ffmpeg/dockerfile/raw
+	client := &http.Client{}
+	url := "https://registry.hub.docker.com/u/bfirsh/" + name + "/raw"
+	req, _ := http.NewRequest( "GET", url, nil )
+	if resp, err := client.Do(req); nil != err {
+		fmt.Println( "Error: ", err )
+	} else {
+		defer resp.Body.Close()
+		body, _ := ioutil.ReadAll(resp.Body)
+		ci <- Tuple{name,string(body)}
+	}
+}
+
+func (c* Client) Filter( items []string ) map[string]string { 
+
+	// Grab a bunch of Dockerfiles, and then process them
+	
+	//count := 0
+	//	ci := make(chan Tuple)
+	// for i, e := range c.results {
+	// 	// go c.grabDockerfile( ci, e["name"] )
+	// 	ci <- Tuple{e,"something"}
+	// 	count++
+		
+	// }
+	// found := make( map[string]string )
+	// for count > 0 {
+	// 	tuple <- ci
+	// 	found[tuple.name] = tuple.dockerfile
+	// }
+
+	// Process it all
+	results := make( map[string]string )
+	return results
+}
+
+func (c* Client) Query( term string ) {
 
 	// GET /v1/search?q=search_term HTTP/1.1
 	// Host: example.com
 	// Accept: application/json
 	client := &http.Client{}
-	url := c.config.Host + c.config.Endpoint + "?term=ffmpeg"
+	url := c.config.Host + c.config.Endpoint + "?term=" + term
 	req, _ := http.NewRequest( "GET", url, nil )
 	req.Header.Add( "Accept", "application/json")
 	req.Header.Add( "User-Agent", "Docker-Client/1.0.0" )
-	req.Header.Add( "X-Registry-Auth", "eyJhdXRoIjoiIiwiZW1haWwiOiIifQ==" )
+	// req.Header.Add( "X-Registry-Auth", "eyJhdXRoIjoiIiwiZW1haWwiOiIifQ==" )
 	if resp, err := client.Do(req); nil != err {
 		fmt.Println( "Error: ", err )
-		return ""
+
 	} else {
 		defer resp.Body.Close()
 		body, _ := ioutil.ReadAll(resp.Body)
-		return string(body)
+		//var f interface{}
+		//err := json.Unmarshal(body, &f)
+		c.results = string(body)
 	}
+	fmt.Println( "Results: " + c.results )
 }

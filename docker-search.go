@@ -73,6 +73,7 @@ UpdateCheck = true
 	}
 }
 
+
 func main() {
 	
 	// var ip  = flag.Int("flagname", 1234, "help message for
@@ -86,11 +87,8 @@ func main() {
 	} else {
 		c := new(Client)
 		if c.LoadConfig( getConfigFilePath() ) {
-			files := make( map[string]string )
-			files["ubuntu"] = "FROM foobar"
-			c.Load( files )
-			c.Query( "foobar" )
-			result := c.Filter( []string{ "Hi" } )
+			c.Query( flag.Arg(0) )
+			result := c.Filter( flag.Args()[1:] )
 			fmt.Println( "Search results: ", result )
 		} else {
 			fmt.Println( "No configuration file found, use --generate-config" )
