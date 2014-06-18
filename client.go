@@ -6,12 +6,13 @@ import (
 	"fmt"
 	"github.com/BurntSushi/toml"
 //	"strings"
-//	"encoding/json"
+	"encoding/json"
 )
 
 type Client struct {
 	config *Config
 	dockerfiles map[string]string
+	images []DockerImage
 	results string
 }
 
@@ -68,8 +69,8 @@ func (c* Client) Filter( items []string ) map[string]string {
 
 	// Grab a bunch of Dockerfiles, and then process them
 	
-	//count := 0
-	//	ci := make(chan Tuple)
+	// count := 0
+	// ci := make(chan Tuple)
 	// for i, e := range c.results {
 	// 	// go c.grabDockerfile( ci, e["name"] )
 	// 	ci <- Tuple{e,"something"}
@@ -85,6 +86,16 @@ func (c* Client) Filter( items []string ) map[string]string {
 	// Process it all
 	results := make( map[string]string )
 	return results
+}
+
+// [{"description":"","is_official":false,"is_trusted":true,"name":"cellofellow/ffmpeg","star_count":1}
+// 	,{"description":"","is_official":false,"is_trusted":true,"name":"bfirsh/ffmpeg","star_count":0}
+
+type DockerImage struct {
+	description string
+	is_official bool
+	name string
+	star_count int
 }
 
 func (c* Client) Query( term string ) {
@@ -104,9 +115,17 @@ func (c* Client) Query( term string ) {
 	} else {
 		defer resp.Body.Close()
 		body, _ := ioutil.ReadAll(resp.Body)
-		//var f interface{}
-		//err := json.Unmarshal(body, &f)
-		c.results = string(body)
+		fmt.Println( "Body: " + string(body) )
+		var images []DockerImage
+		json.Unmarshal(body, &images)
+		for _, di := range images {
+			fmt.Println( "Name: " + di.name )
+		}
+
+		c.images = images
+		//c.results = string(body)
 	}
-	fmt.Println( "Results: " + c.results )
+
+	
+	// fmt.Println( "Results: " + c.results )
 }
