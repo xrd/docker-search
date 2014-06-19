@@ -1,0 +1,6 @@
+FROM ubuntu:12.10
+MAINTAINER Ben Firshman &quot;ben@orchardup.com&quot;
+RUN echo &quot;deb http://archive.ubuntu.com/ubuntu quantal main
+universe&quot; &gt; /etc/apt/sources.list
+RUN apt-get update
+RUN apt-get -y install ffmpeg libavcodec-extra-53

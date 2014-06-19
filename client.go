@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"fmt"
 	"github.com/BurntSushi/toml"
-//	"strings"
+	"strings"
 	"encoding/json"
 )
 
@@ -13,7 +13,7 @@ type Client struct {
 	config *Config
 	dockerfiles map[string]string
 	images []DockerImage
-	results string
+	Results []DockerImage
 }
 
 type Docker struct {
@@ -46,15 +46,16 @@ func (c* Client) LoadConfig( path string ) bool {
 
 
 type Tuple struct {
-	name string
-	dockerfile string
+	Name string
+	Dockerfile string
 	
 }
 
 func (c* Client) grabDockerfile( ci chan Tuple, name string ) {
 	// Raw link: https://registry.hub.docker.com/u/bfirsh/ffmpeg/dockerfile/raw
 	client := &http.Client{}
-	url := "https://registry.hub.docker.com/u/bfirsh/" + name + "/raw"
+	url := "https://registry.hub.docker.com/u/" + name + "/dockerfile/raw"
+	// fmt.Println( "Grabbing dockerfile for " + name + " with URL: " + url )
 	req, _ := http.NewRequest( "GET", url, nil )
 	if resp, err := client.Do(req); nil != err {
 		fmt.Println( "Error: ", err )
@@ -65,27 +66,74 @@ func (c* Client) grabDockerfile( ci chan Tuple, name string ) {
 	}
 }
 
-func (c* Client) Filter( items []string ) map[string]string { 
+func (c* Client) Annotate() {
 
 	// Grab a bunch of Dockerfiles, and then process them
 	
-	// count := 0
-	// ci := make(chan Tuple)
-	// for i, e := range c.results {
-	// 	// go c.grabDockerfile( ci, e["name"] )
-	// 	ci <- Tuple{e,"something"}
-	// 	count++
+	count := 0
+	ci := make(chan Tuple)
+	for _, image := range c.images {
+		go c.grabDockerfile( ci, image.Name )
+		count++
 		
-	// }
-	// found := make( map[string]string )
-	// for count > 0 {
-	// 	tuple <- ci
-	// 	found[tuple.name] = tuple.dockerfile
-	// }
+	}
+	for count > 0 {
+		tuple := <- ci
+		// Apply it to the correct result
+		for _,image := range c.images {
+			if tuple.Name == image.Name {
+				tuple.Dockerfile = tuple.Dockerfile
+			}
+		}
+		count--
+	}
+}
 
-	// Process it all
-	results := make( map[string]string )
-	return results
+func (c* Client) Filter( items []string ) {
+	
+}
+
+type TargetDescription struct {
+	Src bool
+	Version string
+	Target string
+}
+
+func ProcessFilter( needle string ) *TargetDescription {
+	td := new(TargetDescription)
+	td.Src = false
+	td.Version = ""
+	usingColon := strings.Index( needle, ":" ) 
+	usingComma := strings.Index( needle, "," ) 
+	if -1 !=usingColon || -1 != usingComma {
+		// Split it up, using the correct delimiter
+		delimiter := ":"
+		if -1 != usingComma { 
+			delimiter = ","
+		} 
+		pieces := strings.Split( needle, delimiter )
+		needle = pieces[0]
+		for _,e := range pieces[1:] {
+			if "src" == e {
+				td.Src = true
+			} else {
+				// assume it is the version
+				td.Version = e
+			}
+		}
+	}
+	td.Target = needle
+	return td
+}
+
+func Search( needle string, haystack string ) bool {
+	// Do some post processing on the string
+	td := ProcessFilter( needle )
+	
+	if -1 != strings.Index( haystack, td.Target ) {
+		fmt.Println( "Found it!" )
+	}
+	return false
 }
 
 // [{"description":"","is_official":false,"is_trusted":true,"name":"cellofellow/ffmpeg","star_count":1}
@@ -97,6 +145,7 @@ type DockerImage struct {
         IsTrusted bool `json:"is_trusted"`
         Name string
         StarCount int `json:"star_count"`
+	Dockerfile string
 }
 
 func (c* Client) Query( term string ) {
@@ -118,11 +167,7 @@ func (c* Client) Query( term string ) {
 		// fmt.Println( "Body: " + string(body) )
 		var images []DockerImage
 		json.Unmarshal(body, &images)
-		// for _, di := range images {
-		// 	fmt.Println( "Name: " + di.Name )
-		// }
-
 		c.images = images
-		//c.results = string(body)
+		c.Results = images
 	}
 }

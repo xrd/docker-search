@@ -23,16 +23,17 @@ the base image, and even traces back through the image's ancestry.
 Examples:
 
 docker-search ffmpeg -filter=ruby:1.9  # Search for base images with ffpmeg with ruby 1.9
+docker-search ffmpeg -filter=quantal   # Search for base images base ubuntu quantal in the Dockerfile
 docker-search ffmpeg -filter=libavcodec:2.2:src # images with python 2.2 compiled from source 
 docker-search ffmpeg -dockerfile # print out full dockerfiles
 
 Flags:
 
---generate-config   # Create a new configuration file from current defaults
---dockerfile[s]     # Print out full Dockerfile with each results
---filter=str        # Search for the string in the Dockerfile
---string=str:src    # Search for the string with a filter of match
-
+-generate-config   # Create a new configuration file from current defaults
+-dockerfile[s]     # Print out full Dockerfile with each results
+-filter=str        # Search for the string in the Dockerfile
+-filter=str:src    # Search for the string with a filter of match
+-info[rmation]     # Print as much information as possible (maintainer, etc.)
 `
 	fmt.Println( doc )
 
@@ -70,22 +71,51 @@ UpdateCheck = true
 }
 
 
+type filterSlice []string
+
+type Value interface {
+	String() string
+	Set(string) error
+}
+
+func (fs *filterSlice) String() string {
+	return fmt.Sprintf("%d", *fs)
+}
+ 
+func (fs *filterSlice) Set(value string) error {
+	*fs = append(*fs, value)
+	return nil
+}
+
 func main() {
 	
 	// var ip  = flag.Int("flagname", 1234, "help message for
 	// flagname")
 	var genCon = flag.Bool( "generate-config", false, "Generate a new default configuration file" )
+	var printDockerfile = flag.Bool( "dockerfile", false, "Print out dockerfiles" )
+	var printInfo = flag.Bool( "info", false, "Print out detailed information on the maintainer(s)" )
+	var filters filterSlice
+	flag.Var( &filters, "filter", "List of filters" )
 	flag.Parse()
 
 	if *genCon {
 		generateDefaultConfiguration()
-		flag.PrintDefaults()
+		help()
 	} else {
 		c := new(Client)
 		if c.LoadConfig( getConfigFilePath() ) {
 			c.Query( flag.Arg(0) )
-			result := c.Filter( flag.Args()[1:] )
-			fmt.Println( "Search results: ", result )
+			c.Annotate()
+			if flag.NArg() > 1 {
+				c.Filter( filters )
+			}
+			fmt.Println( "Search results: ", c.Results )
+			if *printDockerfile {
+				fmt.Println( "Print the dockerfiles!" )
+			}
+			if *printInfo { 
+				fmt.Println( "Print the personal information" )
+			}
 		} else {
 			fmt.Println( "No configuration file found, use --generate-config" )
 			

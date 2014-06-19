@@ -3,6 +3,7 @@ package main
 import (
 	"testing"
 	"path"
+	"os"
 )
 
 // func abcTestSomething( t *testing.T ) {
@@ -27,4 +28,36 @@ func TestFilters( t* testing.T ) {
 		t.Errorf( "Unable to find ffmpeg library with python and libavcodec" )
 	}
 	
+}
+
+func TestProcessFilter( t* testing.T ) {
+	td := ProcessFilter( "libavcodec" )
+	if td.Target != "libavcodec" && 
+		!td.Src && 
+		"" == td.Version {
+		t.Errorf( "Did not process filter correctly" )
+	}
+	
+	td = ProcessFilter( "libavcodec:src" )
+	if td.Target != "libavcodec" && 
+		td.Src {
+		t.Errorf( "Did not process filter correctly" )
+	}
+	
+	td = ProcessFilter( "libavcodec:2.2" )
+	if td.Target != "libavcodec" && 
+		!td.Src && 
+		"2.2" == td.Version {
+		t.Errorf( "Did not process filter correctly" )
+	}
+
+}
+
+func TestFilter( t* testing.T ) {
+	file, _ := os.Open( path.Join( "test", "fixtures", "bfirst_ffmpeg_dockerfile.txt" ) )
+	if nil != file {
+		
+	} else {
+		t.Errorf( "Nope, unable to open!" )
+	}
 }
