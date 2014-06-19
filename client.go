@@ -92,10 +92,11 @@ func (c* Client) Filter( items []string ) map[string]string {
 // 	,{"description":"","is_official":false,"is_trusted":true,"name":"bfirsh/ffmpeg","star_count":0}
 
 type DockerImage struct {
-	description string
-	is_official bool
-	name string
-	star_count int
+        Description string
+        IsOfficial bool `json:"is_official"`
+        IsTrusted bool `json:"is_trusted"`
+        Name string
+        StarCount int `json:"star_count"`
 }
 
 func (c* Client) Query( term string ) {
@@ -108,24 +109,20 @@ func (c* Client) Query( term string ) {
 	req, _ := http.NewRequest( "GET", url, nil )
 	req.Header.Add( "Accept", "application/json")
 	req.Header.Add( "User-Agent", "Docker-Client/1.0.0" )
-	// req.Header.Add( "X-Registry-Auth", "eyJhdXRoIjoiIiwiZW1haWwiOiIifQ==" )
 	if resp, err := client.Do(req); nil != err {
 		fmt.Println( "Error: ", err )
 
 	} else {
 		defer resp.Body.Close()
 		body, _ := ioutil.ReadAll(resp.Body)
-		fmt.Println( "Body: " + string(body) )
+		// fmt.Println( "Body: " + string(body) )
 		var images []DockerImage
 		json.Unmarshal(body, &images)
-		for _, di := range images {
-			fmt.Println( "Name: " + di.name )
-		}
+		// for _, di := range images {
+		// 	fmt.Println( "Name: " + di.Name )
+		// }
 
 		c.images = images
 		//c.results = string(body)
 	}
-
-	
-	// fmt.Println( "Results: " + c.results )
 }

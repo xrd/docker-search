@@ -22,20 +22,16 @@ the base image, and even traces back through the image's ancestry.
 
 Examples:
 
-docker-search --ruby=1.9  # Search for base images with ruby 1.9
-docker-search --python=2.2,src # images with python 2.2 compiled from source 
-docker-search --last=2 --dockerfile # print out dockerfile from 2nd to last cached search
-docker-search --list # print out cached search list
+docker-search ffmpeg -filter=ruby:1.9  # Search for base images with ffpmeg with ruby 1.9
+docker-search ffmpeg -filter=libavcodec:2.2:src # images with python 2.2 compiled from source 
+docker-search ffmpeg -dockerfile # print out full dockerfiles
 
 Flags:
 
 --generate-config   # Create a new configuration file from current defaults
---dockerfile        # Print out full Dockerfile with results
---string            # Search for the string in the Dockerfile
---string=match      # Search for the string with a filter of match
---string=match,src  # Search for compilation via source for this package
---last=[=N]         # Use a cached query, optionally specify Nth item
---list              # Print cached query list
+--dockerfile[s]     # Print out full Dockerfile with each results
+--filter=str        # Search for the string in the Dockerfile
+--string=str:src    # Search for the string with a filter of match
 
 `
 	fmt.Println( doc )
