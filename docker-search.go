@@ -22,10 +22,10 @@ the base image, and even traces back through the image's ancestry.
 
 Examples:
 
-docker-search ffmpeg -filter=ruby:1.9  # Search for base images with ffpmeg with ruby 1.9
-docker-search ffmpeg -filter=quantal   # Search for base images base ubuntu quantal in the Dockerfile
-docker-search ffmpeg -filter=libavcodec:2.2:src # images with python 2.2 compiled from source 
-docker-search ffmpeg -dockerfile # print out full dockerfiles
+docker-search -filter=ruby:1.9 ffmpeg # Search for base images with ffpmeg with ruby 1.9
+docker-search -filter=quantal ffmpeg  # Search for base images base ubuntu quantal in the Dockerfile
+docker-search -filter=libavcodec:2.2:src ffmpeg # images with python 2.2 compiled from source 
+docker-search -dockerfile ffmpeg # print out full dockerfiles
 
 Flags:
 
@@ -71,54 +71,64 @@ UpdateCheck = true
 }
 
 
-type filterSlice []string
+type filters []string
 
 type Value interface {
 	String() string
 	Set(string) error
 }
 
-func (fs *filterSlice) String() string {
-	return fmt.Sprintf("%d", *fs)
+func (fs *filters) String() string {
+	values := ""
+	for _, s := range *fs {
+		values += s + ":"
+	}
+	return values
 }
  
-func (fs *filterSlice) Set(value string) error {
+func (fs *filters) Set(value string) error {
 	*fs = append(*fs, value)
 	return nil
 }
 
 func main() {
-	
-	// var ip  = flag.Int("flagname", 1234, "help message for
-	// flagname")
+
+	var filts filters
 	var genCon = flag.Bool( "generate-config", false, "Generate a new default configuration file" )
 	var printDockerfile = flag.Bool( "dockerfile", false, "Print out dockerfiles" )
 	var printInfo = flag.Bool( "info", false, "Print out detailed information on the maintainer(s)" )
-	var filters filterSlice
-	flag.Var( &filters, "filter", "List of filters" )
+	flag.Var( &filts, "filter", "List of filters" )
 	flag.Parse()
 
 	if *genCon {
 		generateDefaultConfiguration()
 		help()
+		// flag.PrintDefaults()
 	} else {
-		c := new(Client)
-		if c.LoadConfig( getConfigFilePath() ) {
-			c.Query( flag.Arg(0) )
-			c.Annotate()
-			if flag.NArg() > 1 {
-				c.Filter( filters )
-			}
-			fmt.Println( "Search results: ", c.Results )
-			if *printDockerfile {
-				fmt.Println( "Print the dockerfiles!" )
-			}
-			if *printInfo { 
-				fmt.Println( "Print the personal information" )
-			}
+		if "" == flag.Arg(0) {
+			help()
 		} else {
-			fmt.Println( "No configuration file found, use --generate-config" )
-			
+			c := new(Client)
+			if c.LoadConfig( getConfigFilePath() ) {
+				c.Query( flag.Arg(0) )
+				c.Annotate()
+				if flag.NArg() > 1 {
+					c.Filter( filts )
+				}
+				if *printDockerfile || *printInfo {
+					fmt.Println( "Printing dockerfiles" )
+					for _,e := range c.Results {
+						fmt.Println( "Name: %s\nDescription: %s\nDockerfile:\n%s\n\n", 
+							e.Name, e.Description, e.Dockerfile )
+					}
+				} else {
+					fmt.Println( "Search results: ", c.Results )
+				}
+				
+			} else {
+				fmt.Println( "No configuration file found, use --generate-config" )
+				
+			}
 		}
 	}
 }
