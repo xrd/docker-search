@@ -6,6 +6,22 @@ import (
 	"os"
 )
 
+var json_sample = `
+[{"description":"","is_official":false,"is_trusted":true,"name":"cellofellow/ffmpeg","star_count":1}
+,{"description":"","is_official":false,"is_trusted":true,"name":"bfirsh/ffmpeg","star_count":0}
+,{"description":"","is_official":false,"is_trusted":true,"name":"robd/aws-ffmpeg","star_count":0}
+,{"description":"FFMpeg built from source (git://source.ffmpeg.org/ffmpeg)","is_official":false,"is_trusted":false,"name":"lmars/ffmpeg","star_count":0}
+,{"description":"this has python devenv, a few other build tools, and the open source libavcodec from ffmpeg built from source.","is_official":false,"is_trusted":false,"name":"link/ffmpeg-built","star_count":0}
+,{"description":"","is_official":false,"is_trusted":false,"name":"miovision/ffmpeg","star_count":0}
+,{"description":"","is_official":false,"is_trusted":false,"name":"paulbrennan/ffmpeg","star_count":0}
+,{"description":"","is_official":false,"is_trusted":false,"name":"cmark/ubuntu-ffmpeg","star_count":0}
+,{"description":"","is_official":false,"is_trusted":false,"name":"mikehearn/ubuntu-ffmpeg","star_count":0}
+,{"description":"","is_official":false,"is_trusted":false,"name":"cmark/ubuntu-ffmpeg-ssh","star_count":0}
+,{"description":"","is_official":false,"is_trusted":false,"name":"cmark/ubuntu-14.04-ffmpeg-nfs","star_count":0}
+,{"description":"Docker based FFMPEG - keeping the dependancy soup in a neat Docker container.\n\nInstall ffmpeg from ppa:jon-severinsson/ffmpeg on ubuntu 12.04 container.","is_official":false,"is_trusted":false,"name":"asachs/docker-ffmpeg","star_count":0}
+]
+`
+
 // func abcTestSomething( t *testing.T ) {
 // 	c := new(Client)
 // 	c.Query( "ffmpeg" )

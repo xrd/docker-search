@@ -34,6 +34,8 @@ Flags:
 -filter=str        # Search for the string in the Dockerfile
 -filter=str:src    # Search for the string with a filter of match
 -info[rmation]     # Print as much information as possible (maintainer, etc.)
+-format=table      # Format the output, as a table (default), json or csv
+-annotate=true     # Skip annotation (faster, but ignores filters)
 `
 	fmt.Println( doc )
 
@@ -91,12 +93,20 @@ func (fs *filters) Set(value string) error {
 	return nil
 }
 
+var genCon *bool
+var printDockerfile *bool
+var printInfo *bool
+var format *string
+var skipAnnotation *bool
+var filts filters
+
 func main() {
 
-	var filts filters
-	var genCon = flag.Bool( "generate-config", false, "Generate a new default configuration file" )
-	var printDockerfile = flag.Bool( "dockerfile", false, "Print out dockerfiles" )
-	var printInfo = flag.Bool( "info", false, "Print out detailed information on the maintainer(s)" )
+	genCon = flag.Bool( "generate-config", false, "Generate a new default configuration file" )
+	printDockerfile = flag.Bool( "dockerfile", false, "Print out dockerfiles" )
+	printInfo = flag.Bool( "info", false, "Print out detailed information on the maintainer(s)" )
+	format = flag.String( "format", "table", "Format the output: table, json or csv" )
+	skipAnnotation = flag.Bool( "annotate", true, "Skip annotation with Dockerfile information (faster)" )
 	flag.Var( &filts, "filter", "List of filters" )
 	flag.Parse()
 
@@ -111,24 +121,33 @@ func main() {
 			c := new(Client)
 			if c.LoadConfig( getConfigFilePath() ) {
 				c.Query( flag.Arg(0) )
-				c.Annotate()
-				if flag.NArg() > 1 {
-					c.Filter( filts )
-				}
-				if *printDockerfile || *printInfo {
-					fmt.Println( "Printing dockerfiles" )
-					for _,e := range c.Results {
-						fmt.Println( "Name: %s\nDescription: %s\nDockerfile:\n%s\n\n", 
-							e.Name, e.Description, e.Dockerfile )
+
+				if !*skipAnnotation {
+					c.Annotate()
+					if flag.NArg() > 1 {
+						c.Filter( filts )
 					}
-				} else {
-					fmt.Println( "Search results: ", c.Results )
 				}
+
+				printResults( c )
 				
 			} else {
 				fmt.Println( "No configuration file found, use --generate-config" )
 				
 			}
 		}
+	}
+}
+
+
+func printResults( c* Client ) {
+	if *printDockerfile || *printInfo {
+		fmt.Println( "Printing dockerfiles" )
+		for _,e := range c.Results {
+			fmt.Println( "Name: %s\nDescription: %s\nDockerfile:\n%s\n\n", 
+				e.Name, e.Description, e.Dockerfile )
+		}
+	} else {
+		fmt.Println( "Search results: ", c.Results )
 	}
 }
