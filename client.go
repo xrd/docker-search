@@ -12,7 +12,7 @@ import (
 type Client struct {
 	config *Config
 	dockerfiles map[string]string
-	images []DockerImage
+	Images []DockerImage
 	Results []DockerImage
 }
 
@@ -72,7 +72,7 @@ func (c* Client) Annotate() {
 	
 	count := 0
 	ci := make(chan Tuple)
-	for _, image := range c.images {
+	for _, image := range c.Images {
 		go c.grabDockerfile( ci, image.Name )
 		count++
 		
@@ -80,7 +80,7 @@ func (c* Client) Annotate() {
 	for count > 0 {
 		tuple := <- ci
 		// Apply it to the correct result
-		for _,image := range c.images {
+		for _,image := range c.Images {
 			if tuple.Name == image.Name {
 				tuple.Dockerfile = tuple.Dockerfile
 			}
@@ -93,7 +93,7 @@ func (c* Client) Filter( filters []string ) {
 	results := make( map[string]DockerImage )
 	for _, filter := range filters {
 		td := ProcessFilter( filter )
-		for _, image := range c.images {
+		for _, image := range c.Images {
 			if -1 != strings.Index( image.Dockerfile, td.Target ) {
 				results[image.Name] = image
 			}
@@ -105,7 +105,6 @@ func (c* Client) Filter( filters []string ) {
 	for _,v := range results {
 		c.Results = append( c.Results, v )
 	}
-	
 }
 
 type TargetDescription struct {
@@ -182,7 +181,7 @@ func (c* Client) Query( term string ) {
 		// fmt.Println( "Body: " + string(body) )
 		var images []DockerImage
 		json.Unmarshal(body, &images)
-		c.images = images
+		c.Images = images
 		c.Results = images
 	}
 }
