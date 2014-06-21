@@ -55,21 +55,20 @@ func getConfigFilePath() string {
 	return path.Join( getHomeDir(), DEFAULT_CONFIG_FILE )
 }
 
-func generateDefaultConfiguration() {
+func generateDefaultConfiguration() bool {
 	configPath := getConfigFilePath()
-	
+	rv := false
 	// Generate configuration
 	if file, err := os.Create( configPath ); nil == err {
 		def := `
-Host = "http://192.168.59.103:2375"
-Endpoint = "/v1.12/images/search"
+Host = "https://index.docker.io"
+Endpoint = "/v1/search"
 UpdateCheck = true
 `
 		file.Write( []byte(def) )
-		fmt.Println( "Created new configuration file" )
-	} else {
-		fmt.Println( "Unable to create new configuration file at: ", configPath, err )
+		rv = true
 	}
+	return rv
 }
 
 
@@ -97,7 +96,7 @@ var genCon *bool
 var printDockerfile *bool
 var printInfo *bool
 var format *string
-var skipAnnotation *bool
+var annotation *bool
 var filts filters
 
 func main() {
@@ -106,13 +105,17 @@ func main() {
 	printDockerfile = flag.Bool( "dockerfile", false, "Print out dockerfiles" )
 	printInfo = flag.Bool( "info", false, "Print out detailed information on the maintainer(s)" )
 	format = flag.String( "format", "table", "Format the output: table, json or csv" )
-	skipAnnotation = flag.Bool( "annotate", true, "Skip annotation with Dockerfile information (faster)" )
+	annotation = flag.Bool( "annotate", true, "Annotation with Dockerfile information (slower)" )
 	flag.Var( &filts, "filter", "List of filters" )
 	flag.Parse()
 
 	if *genCon {
-		generateDefaultConfiguration()
-		help()
+		if generateDefaultConfiguration() {
+			fmt.Println( "Generated configuration file." )
+		} else  {
+			fmt.Println( "Unable to create configuration file." )
+		}
+		// help()
 		// flag.PrintDefaults()
 	} else {
 		if "" == flag.Arg(0) {
@@ -122,11 +125,9 @@ func main() {
 			if c.LoadConfig( getConfigFilePath() ) {
 				c.Query( flag.Arg(0) )
 
-				if !*skipAnnotation {
+				if *annotation {
 					c.Annotate()
-					if flag.NArg() > 1 {
-						c.Filter( filts )
-					}
+					c.Filter( filts )
 				}
 
 				printResults( c )
@@ -143,9 +144,9 @@ func main() {
 func printResults( c* Client ) {
 	if *printDockerfile || *printInfo {
 		fmt.Println( "Printing dockerfiles" )
-		for _,e := range c.Results {
-			fmt.Println( "Name: %s\nDescription: %s\nDockerfile:\n%s\n\n", 
-				e.Name, e.Description, e.Dockerfile )
+		for _,e := range c.Images {
+			fmt.Println( fmt.Sprintf( "Name: %s\nDescription: %s\nDockerfile:\n%s\n\n", 
+				e.Name, e.Description, e.Dockerfile ) )
 		}
 	} else {
 		fmt.Println( "Search results: ", c.Results )

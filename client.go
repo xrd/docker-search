@@ -7,6 +7,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"strings"
 	"encoding/json"
+	"log"
 )
 
 type Client struct {
@@ -55,7 +56,7 @@ func (c* Client) grabDockerfile( ci chan Tuple, name string ) {
 	// Raw link: https://registry.hub.docker.com/u/bfirsh/ffmpeg/dockerfile/raw
 	client := &http.Client{}
 	url := "https://registry.hub.docker.com/u/" + name + "/dockerfile/raw"
-	// fmt.Println( "Grabbing dockerfile for " + name + " with URL: " + url )
+	fmt.Println( "Grabbing dockerfile for " + name + " with URL: " + url )
 	req, _ := http.NewRequest( "GET", url, nil )
 	if resp, err := client.Do(req); nil != err {
 		fmt.Println( "Error: ", err )
@@ -80,9 +81,9 @@ func (c* Client) Annotate() {
 	for count > 0 {
 		tuple := <- ci
 		// Apply it to the correct result
-		for _,image := range c.Images {
+		for i,image := range c.Images {
 			if tuple.Name == image.Name {
-				tuple.Dockerfile = tuple.Dockerfile
+				c.Images[i].Dockerfile = tuple.Dockerfile
 			}
 		}
 		count--
@@ -153,6 +154,11 @@ func Search( needle string, haystack string ) bool {
 // [{"description":"","is_official":false,"is_trusted":true,"name":"cellofellow/ffmpeg","star_count":1}
 // 	,{"description":"","is_official":false,"is_trusted":true,"name":"bfirsh/ffmpeg","star_count":0}
 
+type DockerResults struct {
+	Results []DockerImage `json:"results"`
+	Query string `json:"query"`
+}
+
 type DockerImage struct {
         Description string
         IsOfficial bool `json:"is_official"`
@@ -168,7 +174,7 @@ func (c* Client) Query( term string ) {
 	// Host: example.com
 	// Accept: application/json
 	client := &http.Client{}
-	url := c.config.Host + c.config.Endpoint + "?term=" + term
+	url := c.config.Host + c.config.Endpoint + "?q=" + term
 	req, _ := http.NewRequest( "GET", url, nil )
 	req.Header.Add( "Accept", "application/json")
 	req.Header.Add( "User-Agent", "Docker-Client/1.0.0" )
@@ -178,10 +184,13 @@ func (c* Client) Query( term string ) {
 	} else {
 		defer resp.Body.Close()
 		body, _ := ioutil.ReadAll(resp.Body)
-		// fmt.Println( "Body: " + string(body) )
-		var images []DockerImage
-		json.Unmarshal(body, &images)
-		c.Images = images
-		c.Results = images
+		var res DockerResults
+		err := json.Unmarshal(body, &res)
+		if nil == err {
+			c.Images = res.Results
+			c.Results = res.Results
+		} else {
+			log.Fatal( err )
+		}
 	}
 }
