@@ -8,6 +8,7 @@ import (
 	"path"
 	"encoding/json"
 	"strconv"
+	"strings"
 )
 
 func help() {
@@ -176,7 +177,11 @@ func formatTable( c* Client ) {
 	for _,e := range c.Results {
 		fmt.Println( fmt.Sprintf( tableFmt, "Name: ",  e.Name ) )
 		fmt.Println( fmt.Sprintf( tableFmt, "Description: ", e.Description ) )
-		fmt.Println( fmt.Sprintf( "Dockerfile\n\n%s\n\n", e.Dockerfile ) )
+		if "" != strings.TrimSpace( e.Dockerfile ) {
+			fmt.Println( fmt.Sprintf( "Dockerfile\n\n%s\n\n", e.Dockerfile ) )
+		} else {
+			fmt.Println( "No dockerfile found" )
+		}
 	}
 }
 

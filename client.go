@@ -80,7 +80,7 @@ func (c* Client) processDockerfile( ci <-chan Tuple ) {
 	for i,image := range c.Images {
 		if tuple.Name == image.Name {
 			c.log(  "Got dockerfile for: " + tuple.Name ) 
-			c.Images[i].Dockerfile = html.UnescapeString( tuple.Dockerfile )
+			c.Images[i].Dockerfile = strings.TrimSpace( html.UnescapeString( tuple.Dockerfile ) )
 		}
 	}
 	
