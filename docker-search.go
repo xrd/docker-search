@@ -6,6 +6,8 @@ import (
 	"os"
 	"os/user"
 	"path"
+	"encoding/json"
+	"strconv"
 )
 
 func help() {
@@ -34,7 +36,7 @@ Flags:
 -filter=str        # Search for the string in the Dockerfile
 -filter=str:src    # Search for the string with a filter of match
 -info[rmation]     # Print as much information as possible (maintainer, etc.)
--format=table      # Format the output, as a table (default), json or csv
+-format=table      # Format the output, as a table (default) or json
 -annotate=true     # Skip annotation (faster, but ignores filters)
 `
 	fmt.Println( doc )
@@ -94,7 +96,7 @@ func (fs *filters) Set(value string) error {
 
 var genCon *bool
 var printDockerfile *bool
-var printInfo *bool
+// var printInfo *bool
 var format *string
 var annotation *bool
 var filts filters
@@ -103,9 +105,9 @@ func main() {
 
 	genCon = flag.Bool( "generate-config", false, "Generate a new default configuration file" )
 	printDockerfile = flag.Bool( "dockerfile", false, "Print out dockerfiles" )
-	printInfo = flag.Bool( "info", false, "Print out detailed information on the maintainer(s)" )
-	format = flag.String( "format", "table", "Format the output: table, json or csv" )
-	annotation = flag.Bool( "annotate", true, "Annotation with Dockerfile information (slower)" )
+	// printInfo = flag.Bool( "info", false, "Print out detailed information on the maintainer(s)" )
+	format = flag.String( "format", "table", "Format the output: table or json" )
+	annotation = flag.Bool( "annotate", true, "Annotation with Dockerfile information (faster without but no second level search)" )
 	flag.Var( &filts, "filter", "List of filters" )
 	flag.Parse()
 
@@ -141,14 +143,36 @@ func main() {
 }
 
 
+const tableFmt = "%-30s%-30s"
+
+func formatTable( c* Client ) {
+	count := strconv.Itoa( len(c.Results) )
+	fmt.Println( "Found " + count + " results\n\n" )
+
+	for _,e := range c.Results {
+		fmt.Println( fmt.Sprintf( tableFmt, "Name: ",  e.Name ) )
+		fmt.Println( fmt.Sprintf( tableFmt, "Description: ", e.Description ) )
+		fmt.Println( fmt.Sprintf( "Dockerfile\n\n%s\n\n", e.Dockerfile ) )
+	}
+}
+
+func formatJson( c* Client ) {
+	b, _ := json.Marshal( c.Results )
+	fmt.Println( string(b) )
+}
+
 func printResults( c* Client ) {
-	if *printDockerfile || *printInfo {
-		fmt.Println( "Printing dockerfiles" )
-		for _,e := range c.Images {
-			fmt.Println( fmt.Sprintf( "Name: %s\nDescription: %s\nDockerfile:\n%s\n\n", 
-				e.Name, e.Description, e.Dockerfile ) )
+	if *printDockerfile { // || *printInfo {
+		switch *format {
+		case "json": formatJson( c )
+		default: formatTable( c )
 		}
 	} else {
-		fmt.Println( "Search results: ", c.Results )
+		fmt.Println( fmt.Sprintf(         tableFmt, "Name", "Description" ) )
+		fmt.Println( fmt.Sprintf(         tableFmt, "----", "-----------" ) )
+		for _, r := range c.Results {
+			fmt.Println( fmt.Sprintf( tableFmt, r.Name, r.Description ) )
+		}
+
 	}
 }

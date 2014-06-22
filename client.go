@@ -8,6 +8,7 @@ import (
 	"strings"
 	"encoding/json"
 	"log"
+	"html"
 )
 
 type Client struct {
@@ -56,7 +57,6 @@ func (c* Client) grabDockerfile( ci chan Tuple, name string ) {
 	// Raw link: https://registry.hub.docker.com/u/bfirsh/ffmpeg/dockerfile/raw
 	client := &http.Client{}
 	url := "https://registry.hub.docker.com/u/" + name + "/dockerfile/raw"
-	fmt.Println( "Grabbing dockerfile for " + name + " with URL: " + url )
 	req, _ := http.NewRequest( "GET", url, nil )
 	if resp, err := client.Do(req); nil != err {
 		fmt.Println( "Error: ", err )
@@ -83,7 +83,7 @@ func (c* Client) Annotate() {
 		// Apply it to the correct result
 		for i,image := range c.Images {
 			if tuple.Name == image.Name {
-				c.Images[i].Dockerfile = tuple.Dockerfile
+				c.Images[i].Dockerfile = html.UnescapeString( tuple.Dockerfile )
 			}
 		}
 		count--
@@ -165,7 +165,7 @@ type DockerImage struct {
         IsTrusted bool `json:"is_trusted"`
         Name string
         StarCount int `json:"star_count"`
-	Dockerfile string
+	Dockerfile string `json:"dockerfile"`
 }
 
 func (c* Client) Query( term string ) {
