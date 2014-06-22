@@ -100,6 +100,7 @@ var printDockerfile *bool
 var format *string
 var annotation *bool
 var filts filters
+var verbose *bool
 
 func main() {
 
@@ -108,7 +109,7 @@ func main() {
 	// printInfo = flag.Bool( "info", false, "Print out detailed information on the maintainer(s)" )
 	format = flag.String( "format", "table", "Format the output: table or json" )
 	annotation = flag.Bool( "annotate", true, "Annotation with Dockerfile information (faster without but no second level search)" )
-	verbose := flag.Bool( "verbose", false, "Output verbose messages (false)" )
+	verbose = flag.Bool( "verbose", false, "Output verbose messages (false)" )
 	flag.Var( &filts, "filter", "List of filters" )
 	flag.Parse()
 
@@ -138,7 +139,7 @@ func main() {
 				if *annotation {
 					for count > 0 { 
 						queryStr := <- ch
-						fmt.Println( "Query finished for: " + queryStr )
+						logit( "Query finished for: " + queryStr )
 						count--
 					}
 					c.Annotate()
@@ -149,14 +150,19 @@ func main() {
 				
 			} else {
 				fmt.Println( "No configuration file found, use --generate-config" )
-				
 			}
 		}
 	}
 }
 
+func logit( args ...string ) {
+	if *verbose {
+		fmt.Println( args )
+	}
+}
+
 func query( c* Client, query string, ch chan string ) {
-	fmt.Println( "Query docker for " + query )
+	logit( "Query docker for " + query )
 	c.Query( query )
 	ch <- query
 }
