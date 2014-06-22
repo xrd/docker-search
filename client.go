@@ -3,7 +3,8 @@ package main
 import (
 	"net/http"
 	"io/ioutil"
-	"fmt"
+	// "fmt"
+	// "os"
 	"github.com/BurntSushi/toml"
 	"strings"
 	"encoding/json"
@@ -34,9 +35,7 @@ type Config struct {
 }
 
 func (c* Client) log( msg ...string ) {
-	if c.Verbose {
-		fmt.Println( msg )
-	}
+	logit( c.Verbose, msg... )
 }
 
 func (c* Client) LoadConfig( path string ) bool {
@@ -106,15 +105,23 @@ func (c* Client) Annotate() {
 
 func (c* Client) Filter( filters []string ) {
 	
-
 	results := make( map[string]DockerImage )
 
-	if 0 > len( filters ) {
+	out := ""
+	for _, e := range filters {
+		out += " " + e
+	}
+	c.log( "Filters: " + out )
+
+	if 0 < len( filters ) {
 		c.log( "Filtering dockerfiles" )
+		
 		for _, filter := range filters {
+			
 			td := ProcessFilter( filter )
 			for _, image := range c.Images {
 				if -1 != strings.Index( image.Dockerfile, td.Target ) {
+					c.log( "Found match inside Dockerfile" )
 					results[image.Name] = image
 				}
 			}
@@ -123,6 +130,7 @@ func (c* Client) Filter( filters []string ) {
 		// Set them to the results
 		c.Results = []DockerImage{}
 		for _,v := range results {
+			c.log( "Adding result to results: " + v.Name )
 			c.Results = append( c.Results, v )
 		}
 	} else {

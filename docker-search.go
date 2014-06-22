@@ -30,18 +30,11 @@ docker-search -filter=quantal ffmpeg  # Search for base images base ubuntu quant
 docker-search -filter=libavcodec:2.2:src ffmpeg # images with python 2.2 compiled from source 
 docker-search -dockerfile ffmpeg # print out full dockerfiles
 
-Flags:
-
--generate-config   # Create a new configuration file from current defaults
--dockerfile[s]     # Print out full Dockerfile with each results
--filter=str        # Search for the string in the Dockerfile
--filter=str:src    # Search for the string with a filter of match
--info[rmation]     # Print as much information as possible (maintainer, etc.)
--format=table      # Format the output, as a table (default) or json
--annotate=true     # Skip annotation (faster, but ignores filters)
 `
 	fmt.Println( doc )
-
+	fmt.Println( "Flags:\n" )
+	flag.PrintDefaults()
+	fmt.Println( "\n" )
 }
 
 const DEFAULT_CONFIG_FILE = ".docker-search.toml"
@@ -140,7 +133,7 @@ func main() {
 				if *annotation {
 					for count > 0 { 
 						queryStr := <- ch
-						logit( "Query finished for: " + queryStr )
+						logit( *verbose, "Query finished for: " + queryStr )
 						count--
 					}
 					c.Annotate()
@@ -156,14 +149,17 @@ func main() {
 	}
 }
 
-func logit( args ...string ) {
-	if *verbose {
-		fmt.Println( args )
+func logit( verbose bool, args ...string ) {
+	if verbose {
+		for _, m := range args {
+			os.Stderr.Write( []byte(m) )
+		}
+		os.Stderr.Write( []byte("\n") )
 	}
 }
 
 func query( c* Client, query string, ch chan string ) {
-	logit( "Query docker for " + query )
+	logit( *verbose, "Query docker for " + query )
 	c.Query( query )
 	ch <- query
 }
@@ -176,11 +172,13 @@ func formatTable( c* Client ) {
 
 	for _,e := range c.Results {
 		fmt.Println( fmt.Sprintf( tableFmt, "Name: ",  e.Name ) )
-		fmt.Println( fmt.Sprintf( tableFmt, "Description: ", e.Description ) )
+		if "" != strings.TrimSpace( e.Description ) {
+			fmt.Println( fmt.Sprintf( tableFmt, "Description: ", e.Description ) )
+		}
 		if "" != strings.TrimSpace( e.Dockerfile ) {
 			fmt.Println( fmt.Sprintf( "Dockerfile\n\n%s\n\n", e.Dockerfile ) )
 		} else {
-			fmt.Println( "No dockerfile found" )
+			fmt.Println( "No dockerfile found\n" )
 		}
 	}
 }
