@@ -91,20 +91,26 @@ func (c* Client) Annotate() {
 }
 
 func (c* Client) Filter( filters []string ) {
+	
 	results := make( map[string]DockerImage )
-	for _, filter := range filters {
-		td := ProcessFilter( filter )
-		for _, image := range c.Images {
-			if -1 != strings.Index( image.Dockerfile, td.Target ) {
-				results[image.Name] = image
+
+	if 0 > len( filters ) {
+		for _, filter := range filters {
+			td := ProcessFilter( filter )
+			for _, image := range c.Images {
+				if -1 != strings.Index( image.Dockerfile, td.Target ) {
+					results[image.Name] = image
+				}
 			}
 		}
-	}
-
-	// Set them to the results
-	c.Results = []DockerImage{}
-	for _,v := range results {
-		c.Results = append( c.Results, v )
+		
+		// Set them to the results
+		c.Results = []DockerImage{}
+		for _,v := range results {
+			c.Results = append( c.Results, v )
+		}
+	} else {
+		c.Results = c.Images
 	}
 }
 
