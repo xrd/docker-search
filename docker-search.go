@@ -108,6 +108,7 @@ func main() {
 	// printInfo = flag.Bool( "info", false, "Print out detailed information on the maintainer(s)" )
 	format = flag.String( "format", "table", "Format the output: table or json" )
 	annotation = flag.Bool( "annotate", true, "Annotation with Dockerfile information (faster without but no second level search)" )
+	verbose := flag.Bool( "verbose", false, "Output verbose messages (false)" )
 	flag.Var( &filts, "filter", "List of filters" )
 	flag.Parse()
 
@@ -125,8 +126,9 @@ func main() {
 		} else {
 			c := new(Client)
 			if c.LoadConfig( getConfigFilePath() ) {
+				c.Verbose = *verbose
 				count := 0
-				ch := make(chan bool)
+				ch := make(chan string, 3 )
 				for _, q := range flag.Args() {
 					go query( c, q, ch ) //  c.Query(
 					//  flag.Arg(0) )
@@ -135,7 +137,8 @@ func main() {
 
 				if *annotation {
 					for count > 0 { 
-						<- ch
+						queryStr := <- ch
+						fmt.Println( "Query finished for: " + queryStr )
 						count--
 					}
 					c.Annotate()
@@ -152,8 +155,10 @@ func main() {
 	}
 }
 
-func query( c* Client, query string, ch chan bool ) {
-	ch <- c.Query( query )
+func query( c* Client, query string, ch chan string ) {
+	fmt.Println( "Query docker for " + query )
+	c.Query( query )
+	ch <- query
 }
 
 const tableFmt = "%-30s%-30s"
