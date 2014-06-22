@@ -125,9 +125,19 @@ func main() {
 		} else {
 			c := new(Client)
 			if c.LoadConfig( getConfigFilePath() ) {
-				c.Query( flag.Arg(0) )
+				count := 0
+				ch := make(chan bool)
+				for _, q := range flag.Args() {
+					go query( c, q, ch ) //  c.Query(
+					//  flag.Arg(0) )
+					count++
+				}
 
 				if *annotation {
+					for count > 0 { 
+						<- ch
+						count--
+					}
 					c.Annotate()
 					c.Filter( filts )
 				}
@@ -142,6 +152,9 @@ func main() {
 	}
 }
 
+func query( c* Client, query string, ch chan bool ) {
+	ch <- c.Query( query )
+}
 
 const tableFmt = "%-30s%-30s"
 

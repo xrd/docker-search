@@ -168,8 +168,9 @@ type DockerImage struct {
 	Dockerfile string `json:"dockerfile"`
 }
 
-func (c* Client) Query( term string ) {
+func (c* Client) Query( term string ) bool {
 
+	rv := true
 	// GET /v1/search?q=search_term HTTP/1.1
 	// Host: example.com
 	// Accept: application/json
@@ -180,6 +181,7 @@ func (c* Client) Query( term string ) {
 	req.Header.Add( "User-Agent", "Docker-Client/1.0.0" )
 	if resp, err := client.Do(req); nil != err {
 		fmt.Println( "Error: ", err )
+		rv = false
 
 	} else {
 		defer resp.Body.Close()
@@ -193,4 +195,5 @@ func (c* Client) Query( term string ) {
 			log.Fatal( err )
 		}
 	}
+	return rv
 }
