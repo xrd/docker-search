@@ -163,7 +163,7 @@ const tableFmt = "%-30s%-30s"
 
 func formatTable( c* Client ) {
 	count := strconv.Itoa( len(c.Results) )
-	fmt.Println( "Found " + count + " results\n\n" )
+	fmt.Println( "Found " + count + " results\n" )
 
 	for _,e := range c.Results {
 		fmt.Println( fmt.Sprintf( tableFmt, "Name: ",  e.Name ) )
