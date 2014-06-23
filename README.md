@@ -4,12 +4,29 @@ docker-search: a better way to search the docker registry.
 
 ### Why? 
 
-This fails right now
+This does not seem optimal:
 
     $ docker search libavcodec
     NAME      DESCRIPTION   STARS     OFFICIAL   AUTOMATED
+    
+    $ docker search ffmpeg
+    NAME                            DESCRIPTION                                     STARS     OFFICIAL   AUTOMATED
+    cellofellow/ffmpeg                                                              1                    [OK]
+    bfirsh/ffmpeg                                                                   0                    [OK]
+    robd/aws-ffmpeg                                                                 0                    [OK]
+    lmars/ffmpeg                    FFMpeg built from source (git://source.ffm...   0                    
+    link/ffmpeg-built               this has python devenv, a few other build ...   0                    
+    miovision/ffmpeg                                                                0                    
+    paulbrennan/ffmpeg                                                              0                    
+    cmark/ubuntu-ffmpeg                                                             0                    
+    mikehearn/ubuntu-ffmpeg                                                         0                    
+    cmark/ubuntu-ffmpeg-ssh                                                         0                    
+    cmark/ubuntu-14.04-ffmpeg-nfs                                                   0                    
+    asachs/docker-ffmpeg            Docker based FFMPEG - keeping the dependan...   0                    
 
-But, this works:
+Which of these have libavcodec? Do I have to manually go to hub.registry.docker.com and search through Dockerfiles?
+
+How about this instead?
 
     $ docker-search -filter=libavcodec ffmpeg
     Name                          Description                   
