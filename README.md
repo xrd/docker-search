@@ -18,7 +18,7 @@ But, this works:
 
 More about what is happening:
 
-    docker-search -filter=libavcodec -verbose=true ffmpeg | grep -C 5 avcodec
+    $ docker-search -filter=libavcodec -verbose=true -dockerfile ffmpeg | grep -C 5 avcodec
     Query docker for ffmpeg
     Query finished for: ffmpeg
     Annotating dockerfile for cellofellow/ffmpeg
@@ -31,7 +31,6 @@ More about what is happening:
     Filtering dockerfiles
     Found match inside Dockerfile
     Adding result to results: bfirsh/ffmpeg
-    
     ...
     FROM ubuntu:12.10
     MAINTAINER Ben Firshman "ben@orchardup.com"
