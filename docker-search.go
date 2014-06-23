@@ -7,6 +7,7 @@ import (
 	"os/user"
 	"path"
 	"encoding/json"
+	// "net/http"
 	"strconv"
 	"strings"
 )
@@ -114,7 +115,10 @@ func main() {
 		if "" == flag.Arg(0) {
 			help()
 		} else {
+			rwc := new(RealWebClient)
 			c := new(Client)
+			c.Http = rwc
+
 			if c.LoadConfig( getConfigFilePath() ) {
 				c.Verbose = *verbose
 				count := 0

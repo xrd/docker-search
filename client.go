@@ -12,11 +12,16 @@ import (
 	"html"
 )
 
+type WebClient interface {
+	Get(string) []byte
+}
+
 type Client struct {
 	config *Config
 	dockerfiles map[string]string
 	Images []DockerImage
 	Results []DockerImage
+	Http    WebClient
 	Verbose bool
 }
 
@@ -59,18 +64,28 @@ type Tuple struct {
 	
 }
 
-func (c* Client) grabDockerfile( ci chan<- Tuple, name string ) {
+type RealWebClient struct {
+}
+
+func (r* RealWebClient) Get( url string ) []byte {
+	var body []byte
 	// Raw link: https://registry.hub.docker.com/u/bfirsh/ffmpeg/dockerfile/raw
 	client := &http.Client{}
-	url := "https://registry.hub.docker.com/u/" + name + "/dockerfile/raw"
 	req, _ := http.NewRequest( "GET", url, nil )
+	
 	if resp, err := client.Do(req); nil != err {
 		log.Fatal( err )
 	} else {
 		defer resp.Body.Close()
-		body, _ := ioutil.ReadAll(resp.Body)
-		ci <- Tuple{name,string(body)}
+		body, _ = ioutil.ReadAll(resp.Body)
 	}
+	return body
+}
+
+func (c* Client) grabDockerfile( ci chan<- Tuple, name string ) {
+	url := "https://registry.hub.docker.com/u/" + name + "/dockerfile/raw"
+	body := c.Http.Get( url )
+	ci <- Tuple{name,string(body)}
 }
 
 func (c* Client) processDockerfile( ci <-chan Tuple ) {
@@ -82,7 +97,6 @@ func (c* Client) processDockerfile( ci <-chan Tuple ) {
 			c.Images[i].Dockerfile = strings.TrimSpace( html.UnescapeString( tuple.Dockerfile ) )
 		}
 	}
-	
 }
 
 func (c* Client) Annotate() {
@@ -191,26 +205,15 @@ func (c* Client) Query( term string ) bool {
 	// GET /v1/search?q=search_term HTTP/1.1
 	// Host: example.com
 	// Accept: application/json
-	client := &http.Client{}
 	url := c.config.Host + c.config.Endpoint + "?q=" + term
-	req, _ := http.NewRequest( "GET", url, nil )
-	req.Header.Add( "Accept", "application/json")
-	req.Header.Add( "User-Agent", "Docker-Client/1.0.0" )
-	if resp, err := client.Do(req); nil != err {
-		log.Fatal( err )
-		rv = false
-
+	body := c.Http.Get( url )
+	var res DockerResults
+	err := json.Unmarshal(body, &res)
+	if nil == err {
+		c.Images = res.Results
+		c.Results = res.Results
 	} else {
-		defer resp.Body.Close()
-		body, _ := ioutil.ReadAll(resp.Body)
-		var res DockerResults
-		err := json.Unmarshal(body, &res)
-		if nil == err {
-			c.Images = res.Results
-			c.Results = res.Results
-		} else {
-			log.Fatal( err )
-		}
+		log.Fatal( err )
 	}
 	return rv
 }
