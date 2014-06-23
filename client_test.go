@@ -6,25 +6,17 @@ import (
 	"os"
 	"log"
 	"strings"
-	"fmt"
-	//	"encoding/json"
 )
 
 var jsonSample = `
-{ query: "ffmpeg", results: 
+{ "query": "ffmpeg", "results": 
 [{"description":"","is_official":false,"is_trusted":true,"name":"cellofellow/ffmpeg","star_count":1}
 ,{"description":"","is_official":false,"is_trusted":true,"name":"bfirsh/ffmpeg","star_count":0}
 ,{"description":"","is_official":false,"is_trusted":true,"name":"robd/aws-ffmpeg","star_count":0}
-,{"description":"FFMpeg built from source (git://source.ffmpeg.org/ffmpeg)","is_official":false,"is_trusted":false,"name":"lmars/ffmpeg","star_count":0}
-,{"description":"this has python devenv, a few other build tools, and the open source libavcodec from ffmpeg built from source.","is_official":false,"is_trusted":false,"name":"link/ffmpeg-built","star_count":0}
 ,{"description":"","is_official":false,"is_trusted":false,"name":"miovision/ffmpeg","star_count":0}
 ,{"description":"","is_official":false,"is_trusted":false,"name":"paulbrennan/ffmpeg","star_count":0}
 ,{"description":"","is_official":false,"is_trusted":false,"name":"cmark/ubuntu-ffmpeg","star_count":0}
-,{"description":"","is_official":false,"is_trusted":false,"name":"mikehearn/ubuntu-ffmpeg","star_count":0}
-,{"description":"","is_official":false,"is_trusted":false,"name":"cmark/ubuntu-ffmpeg-ssh","star_count":0}
-,{"description":"","is_official":false,"is_trusted":false,"name":"cmark/ubuntu-14.04-ffmpeg-nfs","star_count":0}
-,{"description":"Docker based FFMPEG - keeping the dependancy soup in a neat Docker container.\n\nInstall ffmpeg from ppa:jon-severinsson/ffmpeg on ubuntu 12.04 container.","is_official":false,"is_trusted":false,"name":"asachs/docker-ffmpeg","star_count":0}
-] }
+]}
 `
 
 type MockWebClient struct {
@@ -33,26 +25,40 @@ type MockWebClient struct {
 func (mwc* MockWebClient) Get( url string ) []byte {
 	var rv []byte
 	if -1 != strings.Index( url, "index.docker.io" ) {
-		fmt.Println( "Sending back fake JSON" )
 		// Return the JSON
 		rv = []byte(jsonSample)
 	} else if -1 != strings.Index( url, "registry.hub" ) {
-		fmt.Println( "Sending back fake Dockerfile" )
-		// Return a dockerfile
-		rv = []byte(FfmpegDockerfile)
+		// Only if bfirsh/ffmpeg
+		if -1 != strings.Index( url, "bfirsh/ffmpeg" ) {
+			rv = []byte(FfmpegDockerfile)
+		} else {
+			rv = []byte("FROM ubuntu")
+		}
 	} 
 	return rv
 }
 
-func TestFullCircle( t *testing.T ) {
+func getTestClient() *Client {
 	c := new(Client)
 	c.Http = new(MockWebClient)
-	c.Query( "ffmpeg" )
+	c.LoadConfig( path.Join( ".", "test", "fixtures", DEFAULT_CONFIG_FILE ) )
+	// c.Verbose = true
+	LoadFfmpegDockerfile()
+	return c
+}
 
+func TestFullCircle( t *testing.T ) {
+	c := getTestClient()
+
+	c.Query( "ffmpeg" )
 	c.Annotate()
 	c.Filter( []string{ "quantal" } )
-	if !c.resultFound( "testing/test" ) {
+
+	if !c.resultFound( "bfirsh/ffmpeg" ) {
 		t.Errorf( "Unable to filter for quantal" )
+	}
+	if c.resultFound( "miovision/ffmpeg" ) {
+		t.Errorf( "This should not pass" )
 	}
 	if c.resultFound( "nevergonna/happen" ) {
 		t.Errorf( "Hmm, we should not see this pass" )
@@ -71,8 +77,7 @@ func (c* Client) resultFound( key string ) bool {
 }
 
 // func TestFilters( t* testing.T ) {
-// 	c := new(Client)
-// 	c.LoadConfig( path.Join( ".", "test", "fixtures", DEFAULT_CONFIG_FILE ) )
+// 	c := getTestClient()
 // 	c.Query( "ffmpeg" )
 // 	filters := []string{"libavcodec=src", "python"}
 // 	c.Filter( filters )
@@ -113,7 +118,6 @@ func makeFakeImages() []DockerImage {
 	rv := []DockerImage{}
 	image := new(DockerImage)
 	image.Name = "testing/test"
-	LoadFfmpegDockerfile()
 	image.Dockerfile = FfmpegDockerfile
 	rv = append( rv, *image )
 	return rv
@@ -136,10 +140,8 @@ func LoadFfmpegDockerfile() {
 
 
 func TestFilter( t* testing.T ) {
-	LoadFfmpegDockerfile()
-	c := new(Client)
-	// c.Verbose = true
-	c.LoadConfig( path.Join( ".", "test", "fixtures", DEFAULT_CONFIG_FILE ) )
+
+	c := getTestClient()
 	c.Images = makeFakeImages()
 	c.Filter( []string{ "quantal" } )
 	if !c.resultFound( "testing/test" ) {

@@ -1,4 +1,4 @@
 
-Host = "http://192.168.59.103:2375"
-Endpoint = "/v1.12/images/search"
+Host = "https://index.docker.io"
+Endpoint = "/v1/search"
 UpdateCheck = true

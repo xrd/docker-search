@@ -82,9 +82,14 @@ func (r* RealWebClient) Get( url string ) []byte {
 	return body
 }
 
-func (c* Client) grabDockerfile( ci chan<- Tuple, name string ) {
+func (c* Client) grabDockerfile( name string ) []byte {
 	url := "https://registry.hub.docker.com/u/" + name + "/dockerfile/raw"
 	body := c.Http.Get( url )
+	return body
+}
+
+func (c* Client) sendBackDockerfile( ci chan<- Tuple, name string ) {
+	body := c.grabDockerfile( name )
 	ci <- Tuple{name,string(body)}
 }
 
@@ -106,7 +111,7 @@ func (c* Client) Annotate() {
 	ci := make(chan Tuple, 4 )
 	for _, image := range c.Images {
 		c.log( "Annotating image " + image.Name + " with Dockerfile" )
-		go c.grabDockerfile( ci, image.Name )
+		go c.sendBackDockerfile( ci, image.Name )
 		count++
 		
 	}
@@ -148,6 +153,7 @@ func (c* Client) Filter( filters []string ) {
 			}
 		}
 	} else {
+		// No filters, give back all results
 		c.Results = c.Images
 	}
 }
