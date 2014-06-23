@@ -68,7 +68,6 @@ More about what is happening:
 
     Examples:
     
-    docker-search -filter=ruby1.9 quantal coreos # Search for images with ffpmeg or coreos with ruby 1.9
     docker-search -filter=quantal ffmpeg  # Search for the string quantal in the Dockerfile
     docker-search -dockerfile ffmpeg # print out full dockerfiles
     docker-search -dockerfile -format=json ffmpeg # print out full dockerfiles as JSON
