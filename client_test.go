@@ -4,6 +4,7 @@ import (
 	"testing"
 	"path"
 	"os"
+	"log"
 )
 
 var json_sample = `
@@ -99,15 +100,20 @@ func makeFakeImages() []DockerImage {
 func LoadFfmpegDockerfile() { 
 	file, _ := os.Open( path.Join( "test", "fixtures", "bfirst_ffmpeg_dockerfile.txt" ) )
 	if nil != file {
-		var contents []byte
-		file.Read( contents )
-		FfmpegDockerfile = string(contents)
+		contents := make([]byte, 1024 )
+		_, err := file.Read( contents )
+		if nil == err { 
+			FfmpegDockerfile = string(contents)
+		}
+	} else {
+		log.Fatal( "Cannot load test dockerfile" )
 	}
 }
 
 func TestFilter( t* testing.T ) {
 	LoadFfmpegDockerfile()
 	c := new(Client)
+	// c.Verbose = true
 	c.LoadConfig( path.Join( ".", "test", "fixtures", DEFAULT_CONFIG_FILE ) )
 	c.Images = makeFakeImages()
 	c.Filter( []string{ "quantal" } )
