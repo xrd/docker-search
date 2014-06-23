@@ -16,6 +16,30 @@ But, this works:
     ----                          -----------                   
     bfirsh/ffmpeg 
 
+More about what is happening:
+
+    docker-search -filter=libavcodec -verbose=true ffmpeg | grep -C 5 avcodec
+    Query docker for ffmpeg
+    Query finished for: ffmpeg
+    Annotating dockerfile for cellofellow/ffmpeg
+    Annotating dockerfile for bfirsh/ffmpeg
+    Annotating dockerfile for robd/aws-ffmpeg
+    Annotating dockerfile for lmars/ffmpeg
+    ...
+    Finished annotation of dockerfiles
+    Filters:  libavcodec
+    Filtering dockerfiles
+    Found match inside Dockerfile
+    Adding result to results: bfirsh/ffmpeg
+    
+    ...
+    FROM ubuntu:12.10
+    MAINTAINER Ben Firshman "ben@orchardup.com"
+    RUN echo "deb http://archive.ubuntu.com/ubuntu quantal main universe" > /etc/apt/sources.list
+    RUN apt-get update
+    RUN apt-get -y install ffmpeg libavcodec-extra-53
+    ...
+    
 
 ### Usage
 
