@@ -2,21 +2,26 @@
 
 docker-search: a better way to search the docker registry.
 
+### Why? 
+
+This fails right now
+
+    $ docker search libavcodec
+    NAME      DESCRIPTION   STARS     OFFICIAL   AUTOMATED
+
+But, this works:
+
+    $ docker-search -filter=libavcodec ffmpeg
+    Name                          Description                   
+    ----                          -----------                   
+    bfirsh/ffmpeg 
+
+
 ### Usage
 
 
     docker-search: A better way to search the docker registry
     
-    Why? This fails right now
-
-    $ docker search libavcodec
-    NAME      DESCRIPTION   STARS     OFFICIAL   AUTOMATED
-
-    But, this works:
-    $ docker-search -filter=libavcodec ffmpeg
-    Name                          Description                   
-    ----                          -----------                   
-    bfirsh/ffmpeg 
     
     docker-search does a search against the Docker registry, and then pulls the Dockerfile and 
     searches inside it.
