@@ -84,11 +84,11 @@ More about what is happening:
 
 ### Developer Details ###
 
-docker-search works in three stages right now. 
+docker-search works in three stages right now inside client.go
 
-* search: query the docker index
-* query: annotate the search result with scraped data, like Dockerfiles themselves
-* filter: filter through the data based on interesting information
+* Query: query the docker index
+* Annotate: annotate the search result with scraped data, like Dockerfiles themselves
+* Filter: filter through the data based on interesting information
 
 This structure allows us to write tests since we can seed data (using the `Load` method 
 on the client) that has us skip the first two stages. As long as our results are normal.
