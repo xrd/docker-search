@@ -2,6 +2,42 @@
 
 docker-search: a better way to search the docker registry.
 
+### Usage
+
+
+    docker-search: A better way to search the docker registry
+    
+    Why? This fails right now
+
+    $ docker search libavcodec
+    NAME      DESCRIPTION   STARS     OFFICIAL   AUTOMATED
+
+    But, this works:
+    $ docker-search -filter=libavcodec ffmpeg
+    Name                          Description                   
+    ----                          -----------                   
+    bfirsh/ffmpeg 
+    
+    docker-search does a search against the Docker registry, and then pulls the Dockerfile and 
+    searches inside it.
+
+    Examples:
+    
+    docker-search -filter=ruby1.9 quantal coreos # Search for images with ffpmeg or coreos with ruby 1.9
+    docker-search -filter=quantal ffmpeg  # Search for the string quantal in the Dockerfile
+    docker-search -dockerfile ffmpeg # print out full dockerfiles
+    docker-search -dockerfile -format=json ffmpeg # print out full dockerfiles as JSON
+    
+    Flags:
+    
+      -annotate=true: Annotation with Dockerfile information (faster without but no second level search)
+      -dockerfile=false: Print out dockerfiles
+      -filter=: List of filters
+      -format="table": Format the output: table or json
+      -generate-config=false: Generate a new default configuration file
+      -verbose=false: Output verbose messages (false)
+
+
 ### Developer Details ###
 
 docker-search works in three stages right now. 
