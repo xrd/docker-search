@@ -88,7 +88,7 @@ More about what is happening under the hood with the `-verbose` flag.
     
     docker-search -filter=quantal -filter=avcodec ffmpeg  # Search for the string quantal AND avcodec in the Dockerfile
     docker-search -dockerfile ffmpeg # print out full dockerfiles
-    docker-search -dockerfile -format=json ffmpeg # print out full dockerfiles as JSON
+    docker-search -dockerfile -format=json ffmpeg # print out results as JSON, including dockerfiles 
     
     Flags:
     
