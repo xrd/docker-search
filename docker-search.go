@@ -99,7 +99,7 @@ func main() {
 	format = flag.String( "format", "table", "Format the output: table or json" )
 	annotation = flag.Bool( "annotate", true, "Annotation with Dockerfile information (faster without but no second level search)" )
 	verbose = flag.Bool( "verbose", false, "Output verbose messages (false)" )
-	flag.Var( &filts, "filter", "List of filters" )
+	flag.Var( &filts, "filter", "List of filters; you can have more than one (ANDed together)" )
 	flag.Parse()
 
 	if *genCon {

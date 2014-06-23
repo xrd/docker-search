@@ -35,19 +35,37 @@ How about this instead?
 
 More about what is happening:
 
-    $ docker-search -filter=libavcodec -verbose=true -dockerfile ffmpeg
+    $ docker-search -filter=libavcodec -filter=quantal -verbose=true -dockerfile ffmpeg 
     Query docker for ffmpeg
-    Query finished for: ffmpeg
+    Query response received for: ffmpeg
     Annotating image cellofellow/ffmpeg with Dockerfile
     Annotating image bfirsh/ffmpeg with Dockerfile
     Annotating image robd/aws-ffmpeg with Dockerfile
     Annotating image lmars/ffmpeg with Dockerfile
-    ...
+    Annotating image link/ffmpeg-built with Dockerfile
+    Annotating image miovision/ffmpeg with Dockerfile
+    Annotating image asachs/docker-ffmpeg with Dockerfile
+    Annotating image paulbrennan/ffmpeg with Dockerfile
+    Annotating image cmark/ubuntu-ffmpeg with Dockerfile
+    Annotating image mikehearn/ubuntu-ffmpeg with Dockerfile
+    Annotating image cmark/ubuntu-ffmpeg-ssh with Dockerfile
+    Annotating image cmark/ubuntu-14.04-ffmpeg-nfs with Dockerfile
+    Got dockerfile for: robd/aws-ffmpeg
+    Got dockerfile for: mikehearn/ubuntu-ffmpeg
+    Got dockerfile for: bfirsh/ffmpeg
+    Got dockerfile for: cellofellow/ffmpeg
+    Got dockerfile for: miovision/ffmpeg
+    Got dockerfile for: cmark/ubuntu-ffmpeg
+    Got dockerfile for: lmars/ffmpeg
+    Got dockerfile for: asachs/docker-ffmpeg
+    Got dockerfile for: link/ffmpeg-built
+    Got dockerfile for: cmark/ubuntu-14.04-ffmpeg-nfs
+    Got dockerfile for: paulbrennan/ffmpeg
+    Got dockerfile for: cmark/ubuntu-ffmpeg-ssh
     Finished annotation of dockerfiles
-    Filters:  libavcodec
     Filtering dockerfiles
-    Found match inside Dockerfile
-    Adding result to results: bfirsh/ffmpeg
+    Found match for filter libavcodec of Dockerfile for image: bfirsh/ffmpeg
+    Found match for filter quantal of Dockerfile for image: bfirsh/ffmpeg
     Found 1 results
     
     Name:                         bfirsh/ffmpeg                 
@@ -58,10 +76,8 @@ More about what is happening:
     RUN echo "deb http://archive.ubuntu.com/ubuntu quantal main universe" > /etc/apt/sources.list
     RUN apt-get update
     RUN apt-get -y install ffmpeg libavcodec-extra-53
-    
 
 ### Usage
-
 
     docker-search: A better way to search the docker registry
     
@@ -70,7 +86,7 @@ More about what is happening:
 
     Examples:
     
-    docker-search -filter=quantal ffmpeg  # Search for the string quantal in the Dockerfile
+    docker-search -filter=quantal -filter=avcodec ffmpeg  # Search for the string quantal AND avcodec in the Dockerfile
     docker-search -dockerfile ffmpeg # print out full dockerfiles
     docker-search -dockerfile -format=json ffmpeg # print out full dockerfiles as JSON
     
@@ -78,7 +94,7 @@ More about what is happening:
     
       -annotate=true: Annotation with Dockerfile information (faster without but no second level search)
       -dockerfile=false: Print out dockerfiles
-      -filter=: List of filters
+      -filter=: List of filters; you can have more than one (ANDed together)
       -format="table": Format the output: table or json
       -generate-config=false: Generate a new default configuration file
       -verbose=false: Output verbose messages (false)
