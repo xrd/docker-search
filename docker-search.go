@@ -16,12 +16,8 @@ func help() {
 
 docker-search: A better way to search the docker registry
 
-docker-search can be used to search for specific information inside 
-the docker registry. Want a docker base image with a specific version of 
-ruby? Want to know what build flags were used when compiling that ffmpeg
-binary? docker-search can help with all of that. docker-search searches 
-not only for the name but also peers into the Dockerfile used to build 
-the base image, and even traces back through the image's ancestry. 
+docker-search does a search against the Docker registry, and then pulls 
+Dockerfiles for matching images, searching inside them for more details.
 
 Examples:
 

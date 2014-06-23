@@ -62,9 +62,8 @@ More about what is happening:
 
     docker-search: A better way to search the docker registry
     
-    
-    docker-search does a search against the Docker registry, and then pulls the Dockerfile and 
-    searches inside it.
+    docker-search does a search against the Docker registry, and then pulls Dockerfiles for 
+    matching images, searching inside them for more details.
 
     Examples:
     
