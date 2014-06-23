@@ -38,10 +38,10 @@ More about what is happening:
     $ docker-search -filter=libavcodec -verbose=true -dockerfile ffmpeg | grep -C 5 avcodec
     Query docker for ffmpeg
     Query finished for: ffmpeg
-    Annotating dockerfile for cellofellow/ffmpeg
-    Annotating dockerfile for bfirsh/ffmpeg
-    Annotating dockerfile for robd/aws-ffmpeg
-    Annotating dockerfile for lmars/ffmpeg
+    Annotating image cellofellow/ffmpeg with Dockerfile
+    Annotating image bfirsh/ffmpeg with Dockerfile
+    Annotating image robd/aws-ffmpeg with Dockerfile
+    Annotating image lmars/ffmpeg with Dockerfile
     ...
     Finished annotation of dockerfiles
     Filters:  libavcodec

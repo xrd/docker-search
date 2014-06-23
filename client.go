@@ -91,7 +91,7 @@ func (c* Client) Annotate() {
 	count := 0
 	ci := make(chan Tuple, 4 )
 	for _, image := range c.Images {
-		c.log( "Annotating dockerfile for " + image.Name )
+		c.log( "Annotating image " + image.Name + " with Dockerfile" )
 		go c.grabDockerfile( ci, image.Name )
 		count++
 		
