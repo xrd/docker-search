@@ -117,7 +117,7 @@ func (c* Client) Filter( filters []string ) {
 			td := ProcessFilter( filter )
 			for _, image := range c.Images {
 				if -1 != strings.Index( image.Dockerfile, td.Target ) {
-					c.log( "Found match inside Dockerfile" )
+					c.log( "Found match for filter " + td.Target + " of Dockerfile for image: " + image.Name )
 					counts[image.Name] += 1
 				}
 			}

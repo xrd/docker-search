@@ -128,7 +128,7 @@ func main() {
 				if *annotation {
 					for count > 0 { 
 						queryStr := <- ch
-						logit( *verbose, "Query finished for: " + queryStr )
+						logit( *verbose, "Query response received for: " + queryStr )
 						count--
 					}
 					c.Annotate()
@@ -154,7 +154,7 @@ func logit( verbose bool, args ...string ) {
 }
 
 func query( c* Client, query string, ch chan string ) {
-	logit( *verbose, "Query docker for " + query )
+	logit( *verbose, "Query Docker registry for: " + query )
 	c.Query( query )
 	ch <- query
 }
