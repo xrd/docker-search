@@ -35,7 +35,7 @@ How about this instead?
 
 More about what is happening:
 
-    $ docker-search -filter=libavcodec -verbose=true -dockerfile ffmpeg | grep -C 5 avcodec
+    $ docker-search -filter=libavcodec -verbose=true -dockerfile ffmpeg
     Query docker for ffmpeg
     Query finished for: ffmpeg
     Annotating image cellofellow/ffmpeg with Dockerfile
