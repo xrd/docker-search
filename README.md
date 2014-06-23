@@ -33,7 +33,7 @@ How about this instead?
     ----                          -----------                   
     bfirsh/ffmpeg 
 
-More about what is happening:
+More about what is happening under the hood with the `-verbose` flag.
 
     $ docker-search -filter=libavcodec -filter=quantal -verbose=true -dockerfile ffmpeg 
     Query docker for ffmpeg
