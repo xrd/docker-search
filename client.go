@@ -104,17 +104,12 @@ func (c* Client) Annotate() {
 }
 
 func (c* Client) Filter( filters []string ) {
-	
-	out := ""
-	for _, e := range filters {
-		out += " " + e
-	}
-	c.log( "Filters: " + out )
-
-	filterCount = len( filters )
+	// Set them to the results
+	c.Results = []DockerImage{}
+	filterCount := len( filters )
 	counts := make( map[string]int )
 
-	if 0 < filterCount ) {
+	if 0 < filterCount {
 		c.log( "Filtering dockerfiles" )
 		
 		for _, filter := range filters {
@@ -128,15 +123,15 @@ func (c* Client) Filter( filters []string ) {
 			}
 		}
 		
-		if found {
-			results[image.Name] = image
-		}
-
-		// Set them to the results
-		c.Results = []DockerImage{}
-		for _,v := range results {
-			c.log( "Adding result to results: " + v.Name )
-			c.Results = append( c.Results, v )
+		for k, v := range counts {
+			if v == filterCount {  // Every filter matches
+				// Find the image and add it
+				for _, e := range c.Images {
+					if e.Name == k {
+						c.Results = append( c.Results, e ) // Add it to the results
+					}
+				}
+			}
 		}
 	} else {
 		c.Results = c.Images
