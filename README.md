@@ -80,6 +80,11 @@ More about what is happening:
       -generate-config=false: Generate a new default configuration file
       -verbose=false: Output verbose messages (false)
 
+### Installation
+
+    go get github.com/xrd/docker-search
+
+Or, download the source and install yourself.
 
 ### Developer Details ###
 
