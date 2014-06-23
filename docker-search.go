@@ -25,9 +25,8 @@ the base image, and even traces back through the image's ancestry.
 
 Examples:
 
-docker-search -filter=ruby:1.9 ffmpeg # Search for base images with ffpmeg with ruby 1.9
-docker-search -filter=quantal ffmpeg  # Search for base images base ubuntu quantal in the Dockerfile
-docker-search -filter=libavcodec:2.2:src ffmpeg # images with python 2.2 compiled from source 
+docker-search -filter=ruby:1.9 ffmpeg # Search for images with ffpmeg with ruby 1.9
+docker-search -filter=quantal ffmpeg  # Search for images with quantal in the Dockerfile
 docker-search -dockerfile ffmpeg # print out full dockerfiles
 
 `
