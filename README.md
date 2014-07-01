@@ -1,6 +1,6 @@
 # README #
 
-docker-search: a better way to search the docker registry.
+docker-search: another way to search the docker registry.
 
 ### Why? 
 
