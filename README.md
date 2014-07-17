@@ -1,3 +1,5 @@
+[![Build Status](https://drone.io/github.com/xrd/docker-search/status.png)](https://drone.io/github.com/xrd/docker-search/latest)
+
 # README #
 
 docker-search: another way to search the docker registry.
